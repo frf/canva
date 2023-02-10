@@ -1,0 +1,112 @@
+<html>
+<head>
+<title>Desenhando no canvas do HTML5</title>
+</head>
+ 
+<body style="padding: 15px">
+ 
+<b>Clique e arraste para desenhar</b><br><br>
+ 
+<canvas id="quadro" style="border: 1px solid #666"
+  width="600" height="350"></canvas>
+ 
+<br><br><button onClick="limpar()">Limpar</button>
+ 
+<script type="text/javascript">
+  // obtém uma referência ao canvas
+  var quadro = document.getElementById('quadro');
+  // vamos obter o contexto de desenho
+  var areaDesenho = quadro.getContext("2d");
+   
+  // podemos desenhar?
+  var podeDesenhar = false; // ainda não
+   
+  // vetores para guardar as posições x, y, e se o mouse está sendo
+  // movimentado pressionado
+  var vetorX = new Array();
+  var vetorY = new Array();
+  var vetorArrastar = new Array();
+   
+  // agora vamos adicionar na área de desenho um "ouvidor" de 
+  // eventos mousedown, ou seja, vamos detectar quando o usuário
+  // pressionar o botão do mouse (sem soltar) 
+  quadro.addEventListener('mousedown', function(e){
+    // podemos iniciar o desenho
+    podeDesenhar = true;
+    registrarClique(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
+    desenhar(); // faça o desenho, moço
+  });
+   
+  // o "ouvidor" de evento que detecta se o mouse está sendo arrastado
+  // pressionado
+  quadro.addEventListener('mousemove', function(e){ 
+    if(podeDesenhar){
+      registrarClique(e.pageX - this.offsetLeft, e.pageY - 
+        this.offsetTop, true);
+      desenhar(); // faça o desenho, moço
+    }
+  });
+ 
+  // o "ouvidor" de evento que detecta se o mouse foi liberado
+  // e interrompe o desenho
+  quadro.addEventListener('mouseup', function(e){   
+    podeDesenhar = false;
+  });
+ 
+  // o mouse saiu da área de desenho?
+  quadro.addEventListener('mouseleave', function(e){    
+    podeDesenhar = false;
+  });
+ 
+  function registrarClique(x, y, arrastar){
+    // aqui nós guardamos em vetores as posições x, y do clique ou
+    // o movimento do mouse pressionado.
+    vetorX.push(x);
+    vetorY.push(y);
+    vetorArrastar.push(arrastar);
+  }
+   
+  // é aqui que a mágica ocorre
+  function desenhar(){
+    // primeiro vamos limpar o quadro de desenho
+    areaDesenho.clearRect(0, 0, areaDesenho.canvas.width, 
+      areaDesenho.canvas.height);
+     
+    areaDesenho.strokeStyle = "#5c5cd6"; // cor
+    areaDesenho.lineJoin = "round"; // formato da junção de linha
+    areaDesenho.lineWidth = 5; // largura da linha
+             
+    // percorremos os vetores, usando como base o vetor de coordenadas x
+    for(var i = 0; i < vetorX.length; i++){      
+      areaDesenho.beginPath(); // inicia o caminho
+     
+      // o mouse foi arrastado neste evento?
+      if((vetorArrastar[i] == true && i > 0)){
+        areaDesenho.moveTo(vetorX[i - 1], vetorY[i - 1]);
+      }
+      else{
+        // é o início do desenho
+        areaDesenho.moveTo(vetorX[i] - 1, vetorY[i]);
+      }
+      
+      // desenha a linha do ponto X ao ponto Y  
+      areaDesenho.lineTo(vetorX[i], vetorY[i]);
+      // fecha o caminho
+      areaDesenho.closePath();
+      // conclui de fato o desenho
+      areaDesenho.stroke();
+    }  
+  }
+   
+  // e aqui nós limpamos a área de desenho e esvaziamos os vetores
+  function limpar(){
+    areaDesenho.clearRect(0, 0, areaDesenho.canvas.width, 
+      areaDesenho.canvas.height);
+    vetorX = [];
+    vetorY = [];
+    vetorArrastar = [];
+  }
+</script>
+ 
+</body>
+</html>
